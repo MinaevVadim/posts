@@ -1,8 +1,8 @@
 version: '3.10'
 services:
-  fastapi:
+  app:
     container_name: "app"
-    build: "postbin/fastapi_service/"
+    build: "application/app_service/"
     command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
@@ -12,7 +12,7 @@ services:
       - postgres
       - rabbitmq
     env_file:
-      - path: "./postbin/fastapi_service/.env"
+      - path: "./application/app_service/.env"
     volumes:
       - .:/code
     networks:
@@ -20,12 +20,12 @@ services:
 
   media:
     container_name: "media"
-    build: "postbin/media_service/"
+    build: "application/media_service/"
     command: uvicorn main:app --reload --host 0.0.0.0 --port 8001
     ports:
       - "8001:8001"
     env_file:
-      - path: "./postbin/media_service/.env"
+      - path: "./application/media_service/.env"
     volumes:
       - .:/code
     depends_on:
@@ -35,10 +35,10 @@ services:
 
   notification:
     container_name: "notification"
-    build: "postbin/notification_service/"
+    build: "application/notification_service/"
     command: python main.py
     env_file:
-      - path: "./postbin/notification_service/.env"
+      - path: "./application/notification_service/.env"
     volumes:
       - .:/code
     networks:
@@ -62,7 +62,7 @@ services:
     ports:
       - '5432:5432'
     env_file:
-      - path: "./postbin/fastapi_service/.env"
+      - path: "./application/app_service/.env"
     volumes:
       - /data:/var/lib/postgresql/data
     networks:
