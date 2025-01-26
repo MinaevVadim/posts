@@ -1,0 +1,135 @@
+version: '3.10'
+services:
+  fastapi:
+    container_name: "app"
+    build: "postbin/fastapi_service/"
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_HOSTNAME=postgres
+    depends_on:
+      - postgres
+      - rabbitmq
+    env_file:
+      - path: "./postbin/fastapi_service/.env"
+    volumes:
+      - .:/code
+    networks:
+      - backend
+
+  media:
+    container_name: "media"
+    build: "postbin/media_service/"
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    env_file:
+      - path: "./postbin/media_service/.env"
+    volumes:
+      - .:/code
+    depends_on:
+      - fastapi
+    networks:
+      - backend
+
+  notification:
+    container_name: "notification"
+    build: "postbin/notification_service/"
+    command: python main.py
+    env_file:
+      - path: "./postbin/notification_service/.env"
+    volumes:
+      - .:/code
+    networks:
+      - backend
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: "rabbitmq"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - backend
+
+  postgres:
+    image: postgres
+    container_name: "postgres"
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+      - path: "./postbin/fastapi_service/.env"
+    volumes:
+      - /data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus
+    container_name: "prometheus"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus_data/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - backend
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana
+    container_name: "grafana"
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - backend
+
+  nginx:
+    container_name: "nginx"
+    ports:
+      - "80:80"
+    build: .
+    depends_on:
+      - fastapi
+      - media
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./prometheus_data
+  grafana_data:
+      driver: local
+      driver_opts:
+        o: bind
+        type: none
+        device: ./grafana_data
+  db:
+    driver: local
