@@ -24,8 +24,8 @@ class SQLAlchemyFollowerRepository(
         stmt = (
             select(self._model)
             .options(selectinload(self._model.following))
-            .where(self._model.username == username)
-        )  # type: ignore
+            .where(self._model.username == username) # type: ignore
+        )
         result = await self._session.execute(stmt)
         user = result.scalar_one()
         return user
@@ -67,8 +67,8 @@ class SQLAlchemyFollowerRepository(
         stmt = (
             select(self._model)
             .options(selectinload(self._model.following))
-            .where(User.id == idd)
-        )  # type: ignore
+            .where(User.id == idd) # type: ignore
+        )
         user = await self._session.execute(stmt)
         user = user.scalar_one()
         result = [user.email for user in user.following]

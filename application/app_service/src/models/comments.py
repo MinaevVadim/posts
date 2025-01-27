@@ -20,7 +20,7 @@ class Comment(Base):
     approved: Mapped[bool] = mapped_column(
         server_default=expression.true(), default=True, nullable=False
     )
-    type: Mapped[TypeComment] = mapped_column(default=TypeComment.TEXTUAL)
+    type: Mapped[TypeComment] = mapped_column(default=TypeComment.TEXTUAL, index=True)
     comment_count: Mapped[int] = mapped_column(default=0)
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

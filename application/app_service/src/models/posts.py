@@ -26,7 +26,7 @@ class Post(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     content: Mapped[str] = mapped_column(nullable=False)
     excerpt: Mapped[str] = mapped_column(nullable=False)
-    status: Mapped[Status] = mapped_column(default=Status.PUBLISHED)
+    status: Mapped[Status] = mapped_column(default=Status.PUBLISHED, index=True)
     status_comment: Mapped[StatusComment] = mapped_column(default=StatusComment.OPEN)
     type: Mapped[TypePost] = mapped_column(default=TypePost.ENTERTAINMENT)
     comment_count: Mapped[int] = mapped_column(default=0)
