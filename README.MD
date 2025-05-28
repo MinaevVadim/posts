@@ -39,3 +39,4 @@ Alembic revision --message="create tables" --autogenerate
 ```
 Alembic upgrade head
 ```
+.
